@@ -1,0 +1,4 @@
+"0","unlist(petal.mod$formula)
+"
+"1","Petal.Length ~ Petal.Width * Species
+"
