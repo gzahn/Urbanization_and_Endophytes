@@ -6,6 +6,6 @@ Raw amplicon data is archived in SRA BioProject: [PRJNA1044419](https://www.ncbi
 
 Fungal endophyte community structure in *Ranunculus aquatilis* along an urbanization gradient in the Provo River, Provo, UT, USA
 
-![](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Ranunculus_aquatilis_plant.jpg/1200px-Ranunculus_aquatilis_plant.jpg)
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Ranunculus_aquatilis_plant.jpg/1200px-Ranunculus_aquatilis_plant.jpg" width="200" height="200" />
 
-![]([https://github.com/gzahn/Urbanization_and_Endophytes/blob/main/output/figs/map.png =250x250)
+<img src="https://github.com/gzahn/Urbanization_and_Endophytes/blob/main/output/figs/map.png" width="200" height="200"/>
