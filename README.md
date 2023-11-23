@@ -8,4 +8,4 @@ Fungal endophyte community structure in *Ranunculus aquatilis* along an urbaniza
 
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Ranunculus_aquatilis_plant.jpg/1200px-Ranunculus_aquatilis_plant.jpg)
 
-![](https://gzahn.github.io/gzahn/Urbanization_and_Endophytes/output/figs/map.png)
+![]([https://github.com/gzahn/Urbanization_and_Endophytes/blob/main/output/figs/map.png =250x250)
