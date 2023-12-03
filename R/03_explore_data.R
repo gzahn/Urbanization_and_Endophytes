@@ -7,6 +7,8 @@ library(corncob)
 library(microbiome)
 library(ecodist)
 library(ggmap); packageVersion("ggmap")
+library(FUNGuildR)
+library(fungaltraits)
 source("./R/googlemap_styling.R")
 
 set.seed(666)
@@ -19,17 +21,15 @@ options(warn = 1)
 source("./R/plot_bar2.R")
 set.seed(666)
 
-############
+# clean ps object ####
 
 ps <- readRDS("./output/ps_not-cleaned_no-metadata.RDS")
 # add lat/lon metadata
-meta <- read_xlsx("./data/aquatic-plant-proj-metadata.xlsx") %>% 
+meta <- read_xlsx("./metadata/aquatic-plant-proj-metadata.xlsx") %>% 
   mutate(sampleid = paste0("JM_",site_ID)) %>% 
   dplyr::filter(sampleid %in% ps@sam_data$sampleid) %>% 
   mutate(lat=lat %>% str_remove("_N") %>% as.numeric(),
-         lon=lon %>% str_remove("_W") %>% as.numeric() * -1)
-glimpse(meta)
-meta
+         lon=lon %>% str_remove("_W") %>% as.numeric())
 
 sam <- 
 sample_data(
@@ -58,10 +58,9 @@ data.frame(taxonomy=unname(corncob::otu_to_taxonomy(taxa_names(ps),ps)),
            total_reads=unname(taxa_sums(ps))) %>% 
   write_csv("./output/taxonomy_counts.csv")
   
-plot_bar2(ps %>% transform_sample_counts(function(x){x/sum(x)}),fill = "Phylum")
 
 
-# alpha diversity
+# alpha diversity ####
 diversity <- estimate_richness(ps,measures = c("Observed","Shannon")) %>% 
   mutate(location = ps@sam_data$location)
 plot_richness(ps,measures = c("Observed"),x = "location2") + 
@@ -143,9 +142,11 @@ area <-
                        zoom = 12,
                        scale = 2,
                        style=mapstyle)
-
+meta$location
 ggmap::ggmap(area) +
-  geom_point(data=meta,aes(x=lon,y=lat),color='darkorange',size=4,alpha=.75) 
+  geom_point(data=meta,aes(x=lon,y=lat),color='darkorange',size=4,alpha=.75) +
+  geom_label(data=meta,aes(x=lon,y=lat,label=location),color='darkorange',size=4,alpha=.75)
+
 ggsave("./output/figs/map.png",height = 8,width = 8,dpi=300)
 
 # try looking for taxa tables (existing taxa only) for each location
@@ -238,13 +239,158 @@ data.frame(CoreTaxa=core_taxa %>%
   kableExtra::kable_classic()
 
 
-
+# Beta diversity ####
 # quick ordination
 set.seed(666)
 ord <- ordinate(ps_comp,method = "NMDS")
 plot_ordination(ps_comp,ord,color = "location") + 
   scale_color_viridis_c(end=.9,option = "B") +
   theme_minimal()
+ps_comp@sam_data
+
+
+# FunGuild analysis ####
+db <- fungaltraits::fungal_traits()
+
+
+guilds <- 
+funguild_assign(data.frame(Taxonomy=paste(ps@tax_table[,1],
+                                          ps@tax_table[,2],
+                                          ps@tax_table[,3],
+                                          ps@tax_table[,4],
+                                          ps@tax_table[,5],
+                                          ps@tax_table[,6],
+                                          ps@tax_table[,7],
+                                          sep=",")
+))
+
+
+guilds$guild
+
+# add guild assignments to "pseudo-tax_table"
+# (this replaces and renames the "Kingdom" column)
+ps@tax_table[,1] <- guilds$guild
+attributes(ps@tax_table)$dimnames[[2]][1] <- "Guild"
+ps@tax_table[,1] %>% unique
+# just using "mycorrhizal" as the keyword...
+mutualist_guilds <- 
+  grep("[M,m]ycorrhizal|[E,e]ndophyte",(ps@tax_table[,1]),value = TRUE) %>% 
+  unique()
+
+# identify "saprotrophs"
+saprotroph_guilds <- 
+  grep("[S,s]aprotroph",(ps@tax_table[,1]),value = TRUE) %>% 
+  grep(pattern="[M,m]ycorrhizal",x=.,value = TRUE, invert = TRUE) %>% 
+  unique()
+
+# identify "pathogens"
+pathogen_guilds <- 
+  grep("[P,p]athogen|[P,p]arasite",(ps@tax_table[,1]),value = TRUE) %>% 
+  grep(pattern="[M,m]ycorrhizal",x=.,value = TRUE, invert = TRUE) %>% 
+  unique()
+
+# subset taxa to only mutualists; get row sums; this will be proportion of mutualists
+# in each sample
+
+mutualist_proportions <- 
+  ps %>% transform_sample_counts(function(x){x/sum(x)}) %>% 
+  subset_taxa(Guild %in% mutualist_guilds) %>% 
+  sample_sums()
+
+# build data frame for modeling
+mutualism_df <- 
+  microbiome::meta(ps) %>% 
+  mutate(proportion_mutualist = mutualist_proportions)
+
+# subset taxa to only saprotrophs; get row sums; this will be proportion of mutualists
+# in each sample
+
+saprotroph_proportions <- 
+  ps %>% transform_sample_counts(function(x){x/sum(x)}) %>% 
+  subset_taxa(Guild %in% saprotroph_guilds) %>% 
+  sample_sums()
+
+# build data frame for modeling
+saprotroph_df <- 
+  microbiome::meta(ps) %>% 
+  mutate(proportion_saprotroph = saprotroph_proportions)
+
+# subset taxa to only pathogens; get row sums; this will be proportion of mutualists
+# in each sample
+
+pathogen_proportions <- 
+  ps %>% transform_sample_counts(function(x){x/sum(x)}) %>% 
+  subset_taxa(Guild %in% pathogen_guilds) %>% 
+  sample_sums()
+
+# build data frame for modeling
+pathogen_df <- 
+  microbiome::meta(ps) %>% 
+  mutate(proportion_pathogen = pathogen_proportions)
+pathogen_df
+
+guild_df <- 
+full_join(pathogen_df,mutualism_df) %>% 
+  full_join(saprotroph_df)
+
+## fungal traits ####
+
+# only got like 4 hits total...abandon this database for downstream work!
+
+# # download traits metadata
+# traits_meta <- read_csv("https://github.com/traitecoevo/fungaltraits/releases/download/v0.0.3/funtothefun.csv")
+# 
+# # download FungalTraits database
+# traits_db <- fungaltraits::fungal_traits()
+# names(traits_db$species)
+# # match taxa at genus level
+# genera <- ps@tax_table[,6] %>% str_remove("^g__")
+# species <- ps@tax_table[,7] %>% str_remove("^s__")
+# fungal_traits <- 
+#   data.frame(Genus=genera) %>% 
+#   mutate(species=paste(Genus,species,sep="_")) %>% 
+#   left_join(traits_db,by=c("species","Genus"),multiple='all')
+# View(fungal_traits)
+# # need to condense/remove multiple matches
+# fungal_traits %>% 
+#   dplyr::filter(species != "NA_NA")
+# 
+# # remove traits not associated with biochem functional potential
+# traits_to_ignore <- c(
+#   "redChannel_mean","redChannel_sd","RNAHelicase_count","RNApolymerase_count","spore_length",
+#   "spore_size","spore_width","sporocarp_chitin","sporocarp_N","sporocarp_protein","sporocarp_resp",           
+#   "taxonomic_level_fg","tissue_c","tissue_cn","tissue_cp","tissue_n","tissue_np","tissue_p","total_genes",
+#   "trehalase_count","latitude","map","greenChannel_mean","greenChannel_sd","heatShockProtein_count",
+#   "extension_rate","fruiting_body_size","mat","longitude","melanin_content","melanin_count",
+#   "coldShockProtein_count","dsDNA","blueChannel_mean","blueChannel_sd","ifungorum_number",
+#   "sterol_type","studyName","substrate","trait_fg","trophic_mode_fg",'notes_fg',"source_funguild_fg",
+#   "growth_form_fg","guild_fg","higher_clade","culture_media","culture_notes","elevation","em_expl",
+#   "em_text","colour_mean","confidence_fg","ascoma_development","ascoma_type","ascus_dehiscence",
+#   "uuid","obj_id","speciesMatched"
+# )
+# 
+# # group by species; summarize to find mean values with na.omit=TRUE
+# summarized_traits <- 
+#   fungal_traits %>% 
+#   dplyr::select(-all_of(traits_to_ignore)) %>% 
+#   dplyr::group_by(species) %>% 
+#   summarize(across(where(is.numeric),function(x){mean(x,na.rm=TRUE)}))
+# 
+# names(summarized_traits)
+# 
+# # join traits with tax_table species 
+# 
+# traits <- 
+#   data.frame(Genus=genera) %>% 
+#   mutate(species=paste(Genus,species,sep="_")) %>% 
+#   left_join(summarized_traits,by=c("species"))
+# View(traits)
+
+
+## Model guild proportions ####
+guild_model <- glm(data=guild_df %>% mutate(urban = case_when(location > 5 ~ TRUE, TRUE ~ FALSE)),
+    formula = proportion_pathogen ~ urban)
+summary(guild_model) # need to use urbanization and metals as predictors once we have them, not 'location'
 
 
 

@@ -4,6 +4,7 @@ library(tidyverse); packageVersion("tidyverse")
 library(dada2); packageVersion("dada2")
 library(phyloseq); packageVersion("phyloseq")
 library(Biostrings); packageVersion("Biostrings")
+library(FUNGuildR)
 
 # read otu table
 seqtab.nochim <- readRDS("./output/seqtab_for_taxonomy.RDS")
@@ -32,7 +33,5 @@ sample_names(met) <- meta$sampleid
 ps <- phyloseq(otu,met,tax)
 saveRDS(ps,"./output/ps_not-cleaned_no-metadata.RDS")
 ps
-
-
 
 
