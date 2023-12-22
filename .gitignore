@@ -3,3 +3,4 @@ taxonomy/*
 .Rproj.user
 .R*
 .Rhistory
+**/.DS_Store
