@@ -66,7 +66,7 @@ data.frame(taxonomy=unname(corncob::otu_to_taxonomy(taxa_names(ps),ps)),
            total_reads=unname(taxa_sums(ps))) %>% 
   write_csv("./output/taxonomy_counts.csv")
   
-
+saveRDS(ps,"./output/ps_cleaned.RDS")
 
 # Alpha diversity ####
 diversity <- estimate_richness(ps,measures = c("Observed","Shannon")) %>% 
@@ -876,6 +876,7 @@ for( i in 10:1){
   grouplist[[groupname]]  <- site.unique.taxa[1:i] %>% unlist %>% unique
   # purrr::reduce(unique)
 }
+p <- 
 data.frame(downstream_position = 1:10,
            total_taxa_downstream = 
              grouplist %>% map_dbl(length)) %>% 
@@ -886,6 +887,12 @@ data.frame(downstream_position = 1:10,
   ggplot(aes(x=downstream_position,y=n_unique_taxa/max(n_unique_taxa),fill=position)) +
   geom_col() +
   theme_bw() +
-  labs(x="Location",y="Proportion of taxa unique\n to cumulative watershed") +
-  scale_fill_viridis_d(end=.8)
-ggsave("./output/figs/n_unique_taxa_upstream_and_downstream.png")
+  labs(x="Location",y="Proportion of taxa unique\n to cumulative watershed", fill="Position") +
+  scale_fill_viridis_d(end=.8) +
+  theme(axis.title = element_text(face='bold',size=14),
+        legend.title = element_text(face='bold',size=14),
+        axis.text = element_text(face='bold',size=10),
+        legend.text = element_text(face='bold',size=12))
+p
+ggsave("./output/figs/n_unique_taxa_upstream_and_downstream.png", width = 8, height = 6, dpi=300)
+saveRDS(p,"./output/figs/n_unique_taxa_upstream_and_downstream.RDS")

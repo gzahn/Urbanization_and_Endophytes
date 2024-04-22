@@ -1,0 +1,182 @@
+[1] "gamma_diversity"
+richness_proportion ~ proportion_impervious + proportion_developed_low + 
+    proportion_cultivated_crops
+
+Call:
+glm(formula = gamma_div_step$formula, data = meta)
+
+Deviance Residuals: 
+      Min         1Q     Median         3Q        Max  
+-0.067399  -0.033507  -0.002777   0.017005   0.122432  
+
+Coefficients:
+                             Estimate Std. Error t value Pr(>|t|)   
+(Intercept)                    0.4900     0.1352   3.625  0.00169 **
+proportion_impervious        -21.4916     9.8307  -2.186  0.04086 * 
+proportion_developed_low      57.0673    26.9195   2.120  0.04671 * 
+proportion_cultivated_crops -128.2876    50.9616  -2.517  0.02046 * 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for gaussian family taken to be 0.002488317)
+
+    Null deviance: 0.145083  on 23  degrees of freedom
+Residual deviance: 0.049766  on 20  degrees of freedom
+AIC: -70.174
+
+Number of Fisher Scoring iterations: 2
+
+[1] "mutualist_mod"
+proportion_mutualist ~ proportion_developed + proportion_impervious
+
+Call:
+glm(formula = mutualist_step$formula, data = meta)
+
+Deviance Residuals: 
+     Min        1Q    Median        3Q       Max  
+-0.52382  -0.20312  -0.02582   0.19254   0.50623  
+
+Coefficients:
+                        Estimate Std. Error t value Pr(>|t|)    
+(Intercept)            5.193e-01  1.163e-01   4.464 0.000214 ***
+proportion_developed  -3.020e+07  1.241e+07  -2.433 0.024022 *  
+proportion_impervious  3.020e+07  1.241e+07   2.433 0.024022 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for gaussian family taken to be 0.09029335)
+
+    Null deviance: 2.4816  on 23  degrees of freedom
+Residual deviance: 1.8962  on 21  degrees of freedom
+AIC: 15.192
+
+Number of Fisher Scoring iterations: 2
+
+[1] "pathogen_mod"
+proportion_pathogen ~ proportion_developed + proportion_developed_high
+
+Call:
+glm(formula = pathogen_step$formula, data = meta)
+
+Deviance Residuals: 
+     Min        1Q    Median        3Q       Max  
+-0.66475  -0.09636   0.04739   0.12448   0.29915  
+
+Coefficients:
+                          Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                 1.4237     0.2116   6.728 1.17e-06 ***
+proportion_developed      -50.0094    12.6329  -3.959 0.000717 ***
+proportion_developed_high 470.0978   119.2377   3.943 0.000745 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for gaussian family taken to be 0.06587141)
+
+    Null deviance: 2.4196  on 23  degrees of freedom
+Residual deviance: 1.3833  on 21  degrees of freedom
+AIC: 7.6231
+
+Number of Fisher Scoring iterations: 2
+
+[1] "permanova_mod"
+Permutation test for adonis under reduced model
+Terms added sequentially (first to last)
+Permutation: free
+Number of permutations: 999
+
+vegan::adonis2(formula = otu_table(ps_meta) ~ meta$proportion_developed + meta$proportion_developed_low + meta$proportion_cultivated_crops, data = meta)
+                                 Df SumOfSqs      R2      F Pr(>F)   
+meta$proportion_developed         1   0.7262 0.07285 1.8169  0.006 **
+meta$proportion_developed_low     1   0.5731 0.05749 1.4337  0.062 . 
+meta$proportion_cultivated_crops  1   0.6756 0.06777 1.6903  0.017 * 
+Residual                         20   7.9939 0.80189                 
+Total                            23   9.9688 1.00000                 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+[1] "raretaxa_mod"
+proportion_rare_taxa ~ proportion_developed + proportion_impervious + 
+    proportion_developed_high + proportion_developed_med + proportion_developed_low
+
+Call:
+glm(formula = raretaxa_step$formula, data = meta)
+
+Deviance Residuals: 
+      Min         1Q     Median         3Q        Max  
+-0.140409  -0.041853   0.002792   0.049237   0.114912  
+
+Coefficients:
+                            Estimate Std. Error t value Pr(>|t|)   
+(Intercept)                1.240e+00  8.701e-01   1.425  0.17126   
+proportion_developed      -1.608e+07  1.143e+07  -1.406  0.17667   
+proportion_impervious      1.608e+07  1.143e+07   1.406  0.17667   
+proportion_developed_high  2.565e+02  1.391e+02   1.845  0.08158 . 
+proportion_developed_med  -2.397e+02  7.994e+01  -2.998  0.00772 **
+proportion_developed_low   3.920e+02  1.214e+02   3.229  0.00465 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for gaussian family taken to be 0.005005866)
+
+    Null deviance: 0.204609  on 23  degrees of freedom
+Residual deviance: 0.090106  on 18  degrees of freedom
+AIC: -51.927
+
+Number of Fisher Scoring iterations: 2
+
+[1] "shannon_div_mod"
+Shannon ~ proportion_developed + proportion_developed_low + proportion_cultivated_crops
+
+Call:
+glm(formula = shannon_div_step$formula, data = meta)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.5692  -0.5035   0.1651   0.4545   0.9808  
+
+Coefficients:
+                             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                     7.439      1.914   3.888 0.000915 ***
+proportion_developed         -387.751    139.170  -2.786 0.011400 *  
+proportion_developed_low     1086.540    381.090   2.851 0.009872 ** 
+proportion_cultivated_crops -1809.653    721.442  -2.508 0.020857 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for gaussian family taken to be 0.4986798)
+
+    Null deviance: 19.4024  on 23  degrees of freedom
+Residual deviance:  9.9736  on 20  degrees of freedom
+AIC: 57.034
+
+Number of Fisher Scoring iterations: 2
+
+[1] "uniquetaxa_mod"
+proportion_rare_taxa ~ proportion_developed + proportion_impervious + 
+    proportion_developed_high + proportion_developed_med + proportion_developed_low
+
+Call:
+glm(formula = uniquetaxa_step$formula, data = meta)
+
+Deviance Residuals: 
+      Min         1Q     Median         3Q        Max  
+-0.140409  -0.041853   0.002792   0.049237   0.114912  
+
+Coefficients:
+                            Estimate Std. Error t value Pr(>|t|)   
+(Intercept)                1.240e+00  8.701e-01   1.425  0.17126   
+proportion_developed      -1.608e+07  1.143e+07  -1.406  0.17667   
+proportion_impervious      1.608e+07  1.143e+07   1.406  0.17667   
+proportion_developed_high  2.565e+02  1.391e+02   1.845  0.08158 . 
+proportion_developed_med  -2.397e+02  7.994e+01  -2.998  0.00772 **
+proportion_developed_low   3.920e+02  1.214e+02   3.229  0.00465 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for gaussian family taken to be 0.005005866)
+
+    Null deviance: 0.204609  on 23  degrees of freedom
+Residual deviance: 0.090106  on 18  degrees of freedom
+AIC: -51.927
+
+Number of Fisher Scoring iterations: 2
+

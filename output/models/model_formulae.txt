@@ -1,0 +1,12 @@
+richness_proportion ~ proportion_impervious + proportion_developed_low + 
+    proportion_cultivated_crops
+proportion_mutualist ~ proportion_developed + proportion_impervious
+proportion_pathogen ~ proportion_developed + proportion_developed_high
+Df ~ SumOfSqs + R2 + F + `Pr(>F)`
+proportion_rare_taxa ~ proportion_developed + proportion_impervious + 
+    proportion_developed_high + proportion_developed_med + proportion_developed_low
+richness_proportion ~ proportion_impervious + proportion_developed_low + 
+    proportion_cultivated_crops
+Shannon ~ proportion_developed + proportion_developed_low + proportion_cultivated_crops
+proportion_rare_taxa ~ proportion_developed + proportion_impervious + 
+    proportion_developed_high + proportion_developed_med + proportion_developed_low

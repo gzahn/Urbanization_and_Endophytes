@@ -4,13 +4,59 @@
 library(tidyverse)
 library(patchwork)
 library(broom)
-
+library(VennDiagram)
+library(phyloseq)
+'%ni%' <- Negate("%in%")
 ### Load models ####
 model_paths <- list.files("./output/models",full.names = TRUE, pattern = ".RDS")
 for(i in model_paths){
   mod_name <- i %>% basename() %>% str_remove(".RDS")
   assign(mod_name,readRDS(i),envir = .GlobalEnv)
 }
+for(i in ls(pattern = "_mod$")){
+  x <- get(i)
+  print(formula(x))
+}
+sink(NULL)
+sink("./output/models/model_specifications.txt")
+print("gamma_diversity");gamma_div_mod %>% formula;gamma_div_mod %>% summary
+print("mutualist_mod");mutualist_mod %>% formula;mutualist_mod %>% summary
+print("pathogen_mod");pathogen_mod %>% formula;pathogen_mod %>% summary
+print("permanova_mod");permanova_mod
+print("raretaxa_mod");raretaxa_mod %>% formula;raretaxa_mod %>% summary
+print("shannon_div_mod");shannon_div_mod %>% formula;shannon_div_mod %>% summary
+print("uniquetaxa_mod");uniquetaxa_mod %>% formula;uniquetaxa_mod %>% summary
+sink(NULL)
+
+
+# core taxa and overlap between urban and rural
+ps <- readRDS("./output/ps_cleaned.RDS")
+rural <- ps %>% subset_samples(location < 5)
+urban <- ps %>% subset_samples(location > 4)
+rural_core <- microbiome::core_members(rural,detection = .1, prevalence = .5) %>% corncob::otu_to_taxonomy(data=rural)
+urban_core <- microbiome::core_members(urban,detection = .1, prevalence = .5) %>% corncob::otu_to_taxonomy(data=urban)
+
+rural <- rural %>% subset_taxa(taxa_sums(rural) > 0)
+urban <- urban %>% subset_taxa(taxa_sums(urban) > 0)
+
+set1 <- taxa_names(rural)
+set2 <- taxa_names(urban)
+
+venn.diagram(
+  x = list(set1,set2),
+  category.names = c("Rural sites","Urban sites"),
+  filename = "./output/figs/venn_diagram.tiff",
+  output = TRUE,
+  height = 6,
+  width = 6,units = "in",resolution = 400,imagetype = 'tiff',disable.logging = TRUE,        
+  cat.fontface = "bold",
+  cat.default.pos = "outer",
+  cat.pos = c(-27, 27),
+  cat.dist = c(0.055, 0.055),
+  cat.fontfamily = "sans",
+  cex=1.5,fontface='bold',
+  fill = c("darkblue","darkorange")
+)
 
 ### Load metadata ####
 meta <- readRDS("./output/cleaned_full_metadata.RDS")
@@ -21,8 +67,6 @@ fig.paths <- list.files(pattern = "png",full.names = TRUE,recursive = TRUE)
 
 
 ### Combine models ####
-
-
 richness_mod <- gamma_div_mod
 raretaxa_mod
 shannon_div_mod
@@ -37,14 +81,12 @@ kb <- broom::tidy(raretaxa_mod) %>% mutate(outcome="Rare taxa") %>%
   kableExtra::row_spec(0,bold=TRUE)
 kb
 
-# kableExtra::save_kable(kb,file = "./output/models/kable_table.png")
+kableExtra::save_kable(kb,file = "./output/models/models_outputs_kable_table.png")
 
 
 
 
 ## Regression plots ####
-meta %>% names
-
 simple <- 
 meta %>% 
   dplyr::select(Shannon,Observed,richness_proportion,proportion_unique_taxa,proportion_rare_taxa,
@@ -70,14 +112,12 @@ simple %>%
   theme_bw() +
   theme(strip.text = element_text(face='bold',size=14),
         axis.title = element_text(face='bold',size=14),
-        axis.text = element_text(face='bold',size=10)) +
+        axis.text = element_text(face='bold',size=10),
+        strip.background = element_rect(fill='white')) +
   labs(x="Proportion of impermeable surface in watershed",y="Response values")
 ggsave("./output/figs/impermeable_surface_regression_plots.png",width = 6, height = 7,dpi=400)
 
-
-
-
-
+(ps@tax_table[,2] %>% table) / ntaxa(ps)
 
 
 # examine all significant predictors
