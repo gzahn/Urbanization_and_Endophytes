@@ -12,8 +12,6 @@ seqtab.nochim <- readRDS("./output/seqtab_for_taxonomy.RDS")
 # read taxonomy
 taxa <- readRDS("./output/RDP_Taxonomy_from_dada2.RDS")
 
-
-
 # Hand off to Phyloseq ####
 otu <- otu_table(seqtab.nochim,taxa_are_rows = FALSE)
 tax <- tax_table(taxa)
@@ -31,6 +29,22 @@ met <- sample_data(meta)
 sample_names(met) <- meta$sampleid
 
 ps <- phyloseq(otu,met,tax)
+
+# build quick phylogeny for unifrac
+seqs <- taxa_names(ps) %>% 
+  DNAStringSet()
+names(seqs) <- taxa_names(ps)
+aln <- DECIPHER::AlignSeqs(seqs)
+adj_decipher_alignment <- DECIPHER::AdjustAlignment(aln,processors = parallel::detectCores() - 1)
+dnabin.align <- as.DNAbin(adj_decipher_alignment)
+dm.TN93 <- dist.ml(dnabin.align)
+treeNJ <- NJ(dm.TN93) # Note, tip order != sequence order
+fit <- pml(treeNJ, data=as.phyDat(dnabin.align))
+fit$tree$tip.label <- taxa_names(ps)
+
+
+ps@phy_tree <- phy_tree(fit$tree)
+
 saveRDS(ps,"./output/ps_not-cleaned_no-metadata.RDS")
 ps
 
