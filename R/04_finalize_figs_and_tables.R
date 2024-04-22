@@ -31,6 +31,7 @@ sink(NULL)
 
 # core taxa and overlap between urban and rural
 ps <- readRDS("./output/ps_cleaned.RDS")
+core <- microbiome::core_members(rural,detection = .1, prevalence = .5) %>% corncob::otu_to_taxonomy(data=ps)
 rural <- ps %>% subset_samples(location < 5)
 urban <- ps %>% subset_samples(location > 4)
 rural_core <- microbiome::core_members(rural,detection = .1, prevalence = .5) %>% corncob::otu_to_taxonomy(data=rural)
@@ -119,7 +120,7 @@ ggsave("./output/figs/impermeable_surface_regression_plots.png",width = 6, heigh
 
 (ps@tax_table[,2] %>% table) / ntaxa(ps)
 
-
+citation("MASS")
 # examine all significant predictors
 simple_long <- 
 simple %>% 
