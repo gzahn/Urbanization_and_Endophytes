@@ -7,6 +7,7 @@ library(broom)
 library(VennDiagram)
 library(phyloseq)
 '%ni%' <- Negate("%in%")
+ra <- function(x){x/sum(x)}
 ### Load models ####
 model_paths <- list.files("./output/models",full.names = TRUE, pattern = ".RDS")
 for(i in model_paths){
@@ -36,6 +37,14 @@ rural <- ps %>% subset_samples(location < 5)
 urban <- ps %>% subset_samples(location > 4)
 rural_core <- microbiome::core_members(rural,detection = .1, prevalence = .5) %>% corncob::otu_to_taxonomy(data=rural)
 urban_core <- microbiome::core_members(urban,detection = .1, prevalence = .5) %>% corncob::otu_to_taxonomy(data=urban)
+
+ps_core <- ps %>% 
+  transform_sample_counts(ra) %>% 
+  subset_taxa(taxa_names(ps) %in% names(core))
+ps_core %>% otu_table() %>% as("matrix") %>% heatmap
+
+((ps_core %>% taxa_sums()) / nsamples(ps_core)) %>% unname
+
 
 rural <- rural %>% subset_taxa(taxa_sums(rural) > 0)
 urban <- urban %>% subset_taxa(taxa_sums(urban) > 0)
