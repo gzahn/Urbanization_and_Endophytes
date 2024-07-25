@@ -4,3 +4,4 @@ taxonomy/*
 .R*
 .Rhistory
 **/.DS_Store
+output/figs/manuscript_figs

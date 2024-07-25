@@ -5,10 +5,6 @@ richness_proportion ~ proportion_impervious + proportion_developed_low +
 Call:
 glm(formula = gamma_div_step$formula, data = meta)
 
-Deviance Residuals: 
-      Min         1Q     Median         3Q        Max  
--0.067399  -0.033507  -0.002777   0.017005   0.122432  
-
 Coefficients:
                              Estimate Std. Error t value Pr(>|t|)   
 (Intercept)                    0.4900     0.1352   3.625  0.00169 **
@@ -32,10 +28,6 @@ proportion_mutualist ~ proportion_developed + proportion_impervious
 Call:
 glm(formula = mutualist_step$formula, data = meta)
 
-Deviance Residuals: 
-     Min        1Q    Median        3Q       Max  
--0.52382  -0.20312  -0.02582   0.19254   0.50623  
-
 Coefficients:
                         Estimate Std. Error t value Pr(>|t|)    
 (Intercept)            5.193e-01  1.163e-01   4.464 0.000214 ***
@@ -57,10 +49,6 @@ proportion_pathogen ~ proportion_developed + proportion_developed_high
 
 Call:
 glm(formula = pathogen_step$formula, data = meta)
-
-Deviance Residuals: 
-     Min        1Q    Median        3Q       Max  
--0.66475  -0.09636   0.04739   0.12448   0.29915  
 
 Coefficients:
                           Estimate Std. Error t value Pr(>|t|)    
@@ -100,10 +88,6 @@ proportion_rare_taxa ~ proportion_developed + proportion_impervious +
 Call:
 glm(formula = raretaxa_step$formula, data = meta)
 
-Deviance Residuals: 
-      Min         1Q     Median         3Q        Max  
--0.140409  -0.041853   0.002792   0.049237   0.114912  
-
 Coefficients:
                             Estimate Std. Error t value Pr(>|t|)   
 (Intercept)                1.240e+00  8.701e-01   1.425  0.17126   
@@ -129,10 +113,6 @@ Shannon ~ proportion_developed + proportion_developed_low + proportion_cultivate
 Call:
 glm(formula = shannon_div_step$formula, data = meta)
 
-Deviance Residuals: 
-    Min       1Q   Median       3Q      Max  
--1.5692  -0.5035   0.1651   0.4545   0.9808  
-
 Coefficients:
                              Estimate Std. Error t value Pr(>|t|)    
 (Intercept)                     7.439      1.914   3.888 0.000915 ***
@@ -156,10 +136,6 @@ proportion_rare_taxa ~ proportion_developed + proportion_impervious +
 
 Call:
 glm(formula = uniquetaxa_step$formula, data = meta)
-
-Deviance Residuals: 
-      Min         1Q     Median         3Q        Max  
--0.140409  -0.041853   0.002792   0.049237   0.114912  
 
 Coefficients:
                             Estimate Std. Error t value Pr(>|t|)   

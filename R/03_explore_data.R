@@ -133,6 +133,8 @@ asv_dist <- vegan::vegdist(otu_table(ps_ra),method = "bray")
 
 mrm <- MRM(asv_dist ~ gps_dist)
 data.frame(mrm) %>% 
+  lapply(function(x){round(x,4)}) %>% 
+  as.data.frame() %>% 
   write_csv("./output/MRM_stats_table.csv")
 
 x <- ps_ra
@@ -625,7 +627,8 @@ data.frame(
 
 ## Build models ####
 meta %>% names
-
+# save for future modeling
+saveRDS(meta,"./output/data_frame_for_modeling.RDS")
 ### gamma-div ####
 gamma_div_mod <- 
 glm(data = meta,
@@ -702,17 +705,40 @@ scores <- vegan::rda(otu_table(ps_meta) %>% as("matrix"))
 points1 <- scores$CA$u[,1]
 points2 <- scores$CA$u[,2]
 plot(ord$rproj[,1],ord$rproj[,2])
-data.frame(DCA1=ord$rproj[,1],
-           DCA2=ord$rproj[,2],
+env <- ps_meta@sam_data[,c(47)]
+en <- vegan::envfit(ord, env, permutations = 999, na.rm = TRUE)
+
+en_coord_cont = as.data.frame(vegan::scores(en, "vectors")) * vegan::ordiArrowMul(en) * 300
+en_coord_cat = as.data.frame(vegan::scores(en, "factors")) * vegan::ordiArrowMul(en)
+
+
+
+data.frame(DCA1=ord$rproj[,1] %>% scale(),
+           DCA2=ord$rproj[,2] %>% scale(),
            proportion_developed=meta$proportion_developed,
            developed_category=meta$developed_lgl) %>% 
   ggplot(aes(x=DCA1,y=DCA2)) +
-  geom_point(mapping=aes(color=proportion_developed,x=DCA1,y=DCA2),inherit.aes = FALSE) +
+  geom_point(mapping=aes(color=proportion_developed,x=DCA1,y=DCA2),inherit.aes = FALSE,
+             size=3) +
+  stat_ellipse(aes(linetype=developed_category),color='black') +
+  # geom_segment(aes(x=0,y=0,xend=DCA1,yend=DCA2),data=en_coord_cont[1,],color='black',
+  #              arrow = arrow(length = unit(0.25, "cm")),linewidth=1.5) +
+  # annotate('text',x=1,y=2,label="Developed\nland cover") +
   # stat_ellipse(mapping=aes(color=developed_category,x=DCA1,y=DCA2),inherit.aes = FALSE) +
-  labs(x="DCA1 [28.6%]",y="DCA2 [27.5%]",color="Impermeable surface\nproportion") +
+  labs(x="DCA1 [28.6%]",y="DCA2 [27.5%]",color="Proportion of\ndeveloped\nland cover",
+       linetype="Urbanized zone") +
+  scale_color_viridis_c(end=.8,option = 'magma') +
   # scale_color_manual(values = pal.discrete[c(2,16)]) +
   theme_minimal() +
-  theme(panel.grid = element_blank())
+  theme(#panel.grid = element_blank(),
+        legend.title = element_text(face='bold',size=16),
+        legend.text = element_text(face='bold',size=14),
+        # legend.position = 'bottom',
+        axis.title = element_text(face='bold',size=14))
+ggsave("./output/figs/DCA_Plot.png",dpi=300,height = 6,width = 6)
+ggsave("./output/figs/manuscript_figs/Figure_4_DCA_Plot.png",dpi=300,height = 6,width = 6)
+ggsave("./output/figs/manuscript_figs/Figure_4_DCA_Plot.pdf",dpi=600,height = 6,width = 6)
+
 
 ggsave("./output/figs/DCA_Plot_part_1.png",dpi=300,height = 6,width = 6)
 data.frame(DCA1=ord$rproj[,1],
@@ -739,7 +765,11 @@ permanova_mod <-
 vegan::adonis2(data=meta,
                formula = otu_table(ps_meta) ~ meta$proportion_developed + meta$proportion_developed_low + meta$proportion_cultivated_crops)
 as.data.frame(permanova_mod)
-
+meta
+permanova_mod2 <- 
+  vegan::adonis2(data=meta,
+                 formula = otu_table(ps_meta) ~ meta$developed_lgl)
+as.data.frame(permanova_mod2)
 
 
 
